@@ -1,0 +1,52 @@
+🐳 Docker Installation on Ubuntu (APT Repository Method)
+This guide will help you install the latest Docker Engine, Docker CLI, containerd, and Docker Compose plugin using Docker's official APT repository.
+________________________________________
+✅ Step 1: Update System and Install Prerequisites
+bash
+CopyEdit
+sudo apt-get update
+sudo apt-get install -y ca-certificates curl
+•	apt-get update – Updates the list of available packages.
+•	ca-certificates – Ensures your system can validate SSL certificates.
+•	curl – Used to download files from the internet.
+________________________________________
+✅ Step 2: Add Docker’s Official GPG Key
+Create a directory for the keyrings (if not exists) and download the GPG key:
+bash
+CopyEdit
+sudo install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+sudo chmod a+r /etc/apt/keyrings/docker.asc
+•	install -m 0755 -d – Creates the directory with proper permissions.
+•	The GPG key ensures the packages are from Docker and haven’t been tampered with.
+________________________________________
+✅ Step 3: Set up the Docker APT Repository
+bash
+CopyEdit
+echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] \
+  https://download.docker.com/linux/ubuntu \
+  $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}") stable" | \
+  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+•	Adds the Docker repository URL to your APT sources list.
+•	Dynamically detects your Ubuntu codename (like focal, jammy, etc.).
+________________________________________
+✅ Step 4: Update APT and Install Docker
+bash
+CopyEdit
+sudo apt-get update
+sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+•	docker-ce – Community Edition Docker Engine.
+•	docker-ce-cli – Command-line interface for Docker.
+•	containerd.io – Container runtime Docker uses under the hood.
+•	docker-buildx-plugin – Extended build capabilities.
+•	docker-compose-plugin – Integrated Docker Compose v2 plugin.
+________________________________________
+✅ Step 5: Verify Docker Installation
+bash
+CopyEdit
+docker --version
+docker compose version
+sudo docker run hello-world
+•	hello-world – Pulls and runs a test image to verify everything is set up correctly.
+
