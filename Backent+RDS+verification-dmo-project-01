@@ -1,0 +1,194 @@
+AWS  CONSOLE 
+step-by-step guide to configure and connect AWS RDS MariaDB using the AWS Console before connecting via Bash or backend:
+
+🛠️ AWS Console – Configure Amazon RDS for MariaDB
+✅ Step 1: Go to RDS Console
+•	Navigate to: https://console.aws.amazon.com/rds/
+•	Make sure you are in the correct region (e.g., ap-south-1 Mumbai)
+✅ Step 2: Create MariaDB Database
+1.	Click Create Database
+2.	Choose Easy create
+3.	Engine options:
+o	Engine type: MariaDB
+o	Version: Choose latest (e.g., 11.4)
+4.	Templates:
+o	Choose Free tier (if eligible) or Dev/Test
+5.	Settings:
+o	DB instance identifier: demo-project-01
+o	Master username: admin
+o	Auto Generated  (save username and password as it will show ones)
+6.	DB instance size:
+o	e.g., db.t3.micro (for free tier)
+7.	Storage:
+o	General Purpose (SSD)
+o	Allocated: e.g., 20 GiB
+o	Disable storage autoscaling (optional)
+✅ Step 3: Connectivity Settings
+1.	Virtual Private Cloud (VPC): Select existing or create a new one.
+2.	Subnet group: Use default or create a new DB subnet group.
+3.	Public access: Choose Yes if you want to connect from EC2 or local machine
+4.	VPC security group:
+o	Select existing or
+o	Create a new one with:
+	Inbound rule: MySQL/Aurora (port 3306) from:
+	EC2 security group or
+	IP range (0.0.0.0/0 for testing only — not recommended for production)
+✅ Step 4: Launch the RDS Instance
+•	Click Create database
+•	Wait ~5–10 minutes for status to become Available
+Step 5:  Adjust Security Group
+If you can’t connect:
+1.	Go to EC2 → Security Groups
+2.	Find the security group attached to your RDS
+3.	Add an Inbound Rule:
+o	Type: MySQL/Aurora
+o	Port: 3306
+o	Source: your EC2 security group or IP address
+IN  BACKEND  EC2
+🛠️ MariaDB (MySQL) Setup for Spring Boot Backend on AWS
+________________________________________
+✅ Step 1: Install MySQL Client (for remote RDS access)
+Installed MySQL client core :
+
+apt install mysql-client-core-8.0 –y
+
+✔️ This allows you to connect to external MySQL/MariaDB servers like AWS RDS.
+
+✅ Step 2: Connect to AWS RDS MariaDB
+Use the RDS endpoint, username, and password:
+
+mysql -h < ENDPOINT OF rds > -u admin –p
+ 
+PASSWORD: 
+✔️ Successfully connected to AWS RDS:
+Server version: 11.4.5-MariaDB-log managed by https://aws.amazon.com/rds/
+
+✅ Step 3: Create the Database for Spring Boot
+Inside the MySQL CLI:
+
+CREATE DATABASE student_db;
+✔️ Result:
+Query OK, 1 row affected
+You can now use student_db in your Spring Boot application.properties
+
+mysql> exit; 
+
+CAME OUT OF THE DATABASE
+
+git clone https://github.com/cloud-blitz/EasyCRUD.git
+
+cd EasyCRUD/backend
+
+
+
+Spring Boot Backend Deployment Guide (Ubuntu)
+ 
+
+🔧 Step 1: Install Java (JDK 17)
+apt update && apt install openjdk-17-jdk –y
+Verify Java:
+java –version
+
+
+
+Step 2: Install Maven
+Install Maven:
+apt install maven -y
+Verify Maven:
+mvn -version
+
+Step 3: Configure the Application
+Edit the database config in application.properties:
+
+vim backend/src/main/resources/application.properties
+Update values:
+properties
+server.port=8080
+spring.datasource.url=jdbc:mariadb://ENDPOINT OF RDS DATABASE/student_db
+spring.datasource.username=admin
+spring.datasource.password=password of database
+Replace placeholders:
+•	<DB_HOST>: RDS or MariaDB IP/hostname
+•	<DB_USER>: DB username
+•	<DB_PASS>: DB password
+•	
+📦 Step 4: Build the Spring Boot App
+From the project root:
+mvn clean package
+This will generate a .jar file inside the target/ directory, e.g.:
+target/spring-backend-v1.jar
+
+Step 5: Run the Application
+Run your Spring Boot backend:
+java -jar target/*.jar
+
+
+
+
+
+
+
+
+
+
+
+Let’s practically create a student entry from the frontend EC2 (React), send it to the backend EC2 (Spring Boot), and confirm it's saved in the RDS (MariaDB).
+________________________________________
+✅ GOAL
+Create a student record via the frontend → backend → database.
+________________________________________
+🔗 Step-by-Step: Add Student from Frontend
+🔹 1. Open the Frontend in a Browser
+Access your frontend using:
+http://<frontend-ec2-ip>
+or
+http://yourdomain.com
+You should see the React-based EasyCRUD UI.
+________________________________________
+🔹 2. Locate Student Form
+You should see a form like
+Student Registration
+- Name
+- Email
+- Phone
+- Course
+[ Submit ]
+🔹 3. Fill the Form
+Example:
+•	Name: Aarav Mehta
+•	Email: aarav@example.com
+•	Phone: 9876543210
+•	Course: Java
+Click Submit / Register
+✅ After submission:
+•	The UI should either show a success message or refresh with the new entry
+•	No red errors in the browser’s console (press F12 → Console tab)
+________________________________________
+🧪 Step-by-Step Verification
+✅ A. Check Backend Received the Request
+SSH into your backend EC2 and check the log:
+
+tail -f backend.log
+You should see:
+POST /api/students
+If yes → the frontend successfully hit the backend.
+
+✅ B. Check if Student Saved in DB
+Now log in to your RDS MariaDB instance:
+
+mysql -h demo-project-02.cvys642su4gf.ap-south-1.rds.amazonaws.com -u admin -p
+Run:
+USE student_db;
+SELECT * FROM user;
+You should see:
+
++----+-------------+-------------------+-------------+--------+
+| id | name        | email             | phone       | course |
++----+-------------+-------------------+-------------+--------+
+| 1  | Aarav Mehta | aarav@example.com | 9876543210  | Java   |
++----+-------------+-------------------+-------------+--------+
+✅ Data was successfully saved in the RDS DB.
+
+
+
+
