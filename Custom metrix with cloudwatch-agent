@@ -1,0 +1,131 @@
+Step-by-Step: Send Custom Metrics using CloudWatch Agent
+________________________________________
+🔹 Step : IAM Role with CloudWatch Permissions
+If you're using an EC2 instance:
+👉 Create IAM Role:
+1.	Go to IAM → Roles → Create role
+2.	Select "EC2" as trusted entity
+3.	Attach the following policies:
+o	CloudWatchAgentServerPolicy
+4.	Name it: e.g., EC2CloudWatchAgentRole
+5.	Attach this role to your EC2 instance
+Step 1: Download the .deb package manually (CloudWatch-Agent) (DOWNLOAD)
+
+wget https://s3.amazonaws.com/amazoncloudwatch-agent/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb
+🔹 Step 2: Install the package (CloudWatch-Agent) (INSTALL)
+ dpkg -i amazon-cloudwatch-agent.deb
+
+CloudWatch Agent configuration is  now targeting:
+
+✅ Metrics Collection:
+•	CPU (cpu_usage_idle, user, system)
+•	Memory (mem_used_percent)
+•	Disk usage for / (used_percent)
+•	Namespace: CustomEC2Metrics
+✅ Logs Collection: (Nginx should be installed on your EC2 instance)
+•	/var/log/nginx/access.log → NGINXAccessLogs
+•	/var/log/nginx/error.log → NGINXErrorLogs
+
+
+
+
+CloudWatch Agent Configuration File (JSON)  (CONFIGURE)
+[]# vim config.json 
+inside config.json paste below json file
+{
+  "agent": {
+    "metrics_collection_interval": 60,
+    "logfile": "/opt/aws/amazon-cloudwatch-agent/logs/amazon-cloudwatch-agent.log",
+    "run_as_user": "root"
+  },
+  "metrics": {
+    "namespace": "CustomEC2Metrics",
+    "append_dimensions": {
+      "InstanceId": "${aws:InstanceId}"
+    },
+    "metrics_collected": {
+      "cpu": {
+        "measurement": [
+          "cpu_usage_idle",
+          "cpu_usage_user",
+          "cpu_usage_system"
+        ],
+        "metrics_collection_interval": 60,
+        "totalcpu": true
+      },
+      "mem": {
+        "measurement": [
+          "mem_used_percent"
+        ],
+        "metrics_collection_interval": 60
+      },
+      "disk": {
+        "measurement": [
+          "used_percent"
+        ],
+        "resources": [
+          "/"
+        ],
+        "metrics_collection_interval": 60
+      }
+    }
+  },
+  "logs": {
+    "logs_collected": {
+      "files": {
+        "collect_list": [
+          {
+            "file_path": "/var/log/nginx/access.log",
+            "log_group_name": "NGINXAccessLogs",
+            "log_stream_name": "{instance_id}-access",
+            "timestamp_format": "%d/%b/%Y:%H:%M:%S"
+          },
+          {
+            "file_path": "/var/log/nginx/error.log",
+            "log_group_name": "NGINXErrorLogs",
+            "log_stream_name": "{instance_id}-error",
+            "timestamp_format": "%Y/%m/%d %H:%M:%S"
+          }
+        ]
+      }
+    }
+  }
+}
+
+
+▶️ Start CloudWatch Agent with This Config (RUN)
+
+ /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl \
+-a fetch-config \
+-m ec2 \
+-c file:config.json \
+-s
+
+
+Verify:
+View Custom Metrics in CloudWatch
+1.	Go to CloudWatch Console
+https://console.aws.amazon.com/cloudwatch
+2.	Click "Metrics" in the left menu.
+3.	Click "All metrics" → Select CustomEC2Metrics.
+4.	Choose "InstanceId" to view metrics.
+5.	View metrics like:
+o	mem_used_percent
+o	disk_used_percent
+o	cpu_usage_idle, cpu_usage_user, cpu_usage_system
+View Logs in CloudWatch
+1.	Go to CloudWatch Console
+https://console.aws.amazon.com/cloudwatch
+2.	In the left menu, click “Logs” → “Log groups”.
+3.	Find your log groups:
+o	NGINXAccessLogs
+o	NGINXErrorLogs
+
+🔸 On EC2 instance:
+
+tail -f /opt/aws/amazon-cloudwatch-agent/logs/amazon-cloudwatch-agent.log
+
+agent status check
+ []# systemctl status amazon-cloudwatch-agent
+
+
