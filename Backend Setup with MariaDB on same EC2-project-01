@@ -1,0 +1,108 @@
+Backend Setup with MariaDB on same EC2 
+✅ Goal:
+Run the backend from EasyCRUD repository with MariaDB on the same EC2 instance.
+________________________________________
+🔹 1. Clone Backend Code
+git clone https://github.com/cloud-blitz/EasyCRUD.git
+cd EasyCRUD/backend
+________________________________________
+🔹 2. Update System & Install MariaDB + MySQL Client
+apt update
+apt install mysql-client-core-8.0 -y
+apt install mariadb-server -y
+________________________________________
+🔹 3. Start & Enable MariaDB Service
+systemctl start mariadb
+systemctl enable mariadb
+systemctl status mariadb
+________________________________________
+🔹 4. Secure MariaDB Installation
+mysql_secure_installation
+Answer prompts as follows:
+Prompt	Recommended Answer
+Enter current password	[Press Enter]
+Switch to unix_socket auth	y
+Change root password	y, then enter new passwordlike123
+Remove anonymous users	y
+Disallow root login remotely	y
+Remove test database	y
+Reload privilege tables	y
+________________________________________
+🔹 5. Login to MariaDB
+mysql -u root -p
+Enter your new root password.
+________________________________________
+🔹 6. Create Database
+CREATE DATABASE student_db;
+EXIT;
+
+________________________________________
+🔹 7. Install OpenJDK (Java 17)
+apt install openjdk-17-jdk -y
+✅ Verify Java Version
+java -version
+Expected output (example):
+openjdk version "17.x.x"
+________________________________________
+🔹 8. Install Maven
+apt install maven -y
+✅ Verify Maven Version
+mvn -version
+________________________________________
+🔹 9. Configure Database in Spring Boot
+Open the Spring Boot config file:
+vim backend/src/main/resources/application.properties
+✅ Add the following properties:
+server.port=8080
+spring.datasource.url=jdbc:mariadb://localhost:3306/student_db  (note :local host because mariadb is in same ec2)
+spring.datasource.username=root
+spring.datasource.password=123
+
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MariaDBDialect
+________________________________________
+🔹 10. Build the Project with Maven
+mvn clean package
+•	This will compile and package the Spring Boot project.
+•	Final JAR will be in the target/ directory.
+________________________________________
+🔹 11. Run the Spring Boot Application
+java -jar target/*.jar
+
+Before accessing your Spring Boot backend on http://<EC2-PUBLIC-IP>:8080/api, you must ensure that port 8080 is open in your EC2 Security Group.
+
+Since you’ve deployed both:
+•	✅ Frontend (in S3)
+•	✅ Backend (on EC2 using Spring Boot + MariaDB)
+Now let’s practically test the entire flow:
+📥 Submit student info on the frontend → 📤 Sent to backend → 💾 Saved in MariaDB → 🔍 View it from DB.
+✅ PRACTICAL FLOW: Student Record Submission & Verification
+________________________________________
+🔹 1. Open Frontend in Browser
+Go to your S3 Website URL, e.g.:
+http://easycrud-frontend.s3-website-ap-south-1.amazonaws.com
+________________________________________
+🔹 2. Fill Out the Student Form
+On the frontend page, enter details like:
+•	Name: Shubham
+•	Age: 23
+•	Course: Computer Science
+•	Email: shubham@example.com
+Click Submit.
+________________________________________
+🔹 3. Backend Logs (Optional Check)
+SSH into EC2 backend instance ("NOTE :- SSH into another terminal session of the backend EC2 instance without disturbing the running backend server, which is already running with java -jar target/*.jar."ssh -i your-key.pem ec2-user@<EC2-PUBLIC-IP>
+________________________________________
+🔹 4. Connect to MariaDB & View Records
+mysql -u root –p
+
+USE student_db;
+
+SHOW TABLES;
+
+SELECT * FROM student;
+✅ You should see your student record like:
+id	name	age	course	email
+1	Shubham	23	Computer Science	shubham@example.com
+
