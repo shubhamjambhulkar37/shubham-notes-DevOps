@@ -1,0 +1,182 @@
+complete step-by-step note with terminal commands and actual outputs, making it easier for you to understand and revise.
+________________________________________
+✅ Git + GitHub (SSH) Integration – Full Guide with Terminal Output
+________________________________________
+🔹 1. Create a New Project Folder
+mkdir gitpractis-01
+cd gitpractis-01
+📦 Creates and moves into your project directory
+________________________________________
+🔹 2. Initialize Git Repository
+git init
+Output:
+sql
+CopyEdit
+hint: Using 'master' as the name for the initial branch...
+Initialized empty Git repository in /root/gitpractis-01/.git/
+________________________________________
+🔹 3. Create a File (index.html)
+vim index.html
+✏️ Write some content and save the file. ……File in working area
+________________________________________
+🔹 4. Check Git Status
+git status
+Output:
+On branch master
+No commits yet
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+        index.html
+________________________________________
+🔹 5. Add File to Git
+git add index.html
+✅ File added to staging area.
+________________________________________
+🔹 6. Check Status Again
+git status
+Output:
+On branch master
+No commits yet
+Changes to be committed:
+  (use "git rm --cached <file>..." to unstage)
+        new file:   index.html
+________________________________________
+🔹 7. Commit the File
+git commit -m "first version"
+Output:
+[master (root-commit) 8a0805d] first version
+ 1 file changed, 1 insertion(+)
+ create mode 100644 index.html
+✅ File added to Local Repo.________________________________________
+🔹 8. Confirm Clean Status
+git status
+Output:
+On branch master
+nothing to commit, working tree clean
+________________________________________
+🔹 9. Generate SSH Key
+ssh-keygen
+When prompted:
+Enter file in which to save the key (/root/.ssh/id_ed25519): /root/.ssh/id_rsa
+/root/.ssh/id_rsa already exists.
+Overwrite (y/n)? y
+Enter passphrase (empty for no passphrase):
+Enter same passphrase again:
+Output:
+Your identification has been saved in /root/.ssh/id_rsa
+Your public key has been saved in /root/.ssh/id_rsa.pub
+The key fingerprint is:
+SHA256:... root@DESKTOP-KV94JUF
+________________________________________
+🔹 10. View Public Key
+cat /root/.ssh/id_rsa.pub
+Output (example):
+ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICnFz2ms... root@DESKTOP-KV94JUF
+📋 Copy this and add it to your GitHub:
+GitHub → Settings → SSH and GPG keys → New SSH Key
+________________________________________
+🔹 11. Optional SSH Config File 
+vim /root/.ssh/config
+✏️ Add:
+Host github.com
+  HostName github.com
+  User git
+  IdentityFile ~/.ssh/id_rsa
+
+:wq!
+
+Change the permission of file config 
+chmod 600 /root/.ssh/config
+________________________________________
+🔹 12. Test SSH Connection
+ssh -T git@github.com
+Output:
+Hi your username ! You've successfully authenticated, but GitHub does not provide shell access.
+________________________________________
+
+
+
+🔹 13. Add GitHub Remote Repository
+git remote add origin git@github.com:shubhamjambhulkar37/remote-repo-01.git
+ 
+"Note: Use the SSH URL provided by the remote repository (e.g., GitHub) when setting up the connection."
+________________________________________
+🔹 14. Push Code to GitHub
+git push -u origin master
+Output:
+Enumerating objects: 3, done.
+Counting objects: 100% (3/3), done.
+Writing objects: 100% (3/3), 250 bytes | 125.00 KiB/s, done.
+Total 3 (delta 0), reused 0 (delta 0), pack-reused 0
+To github.com:shubhamjambhulkar37/remote-repo-01.git
+ * [new branch]      master -> master
+branch 'master' set up to track 'origin/master'.
+________________________________________
+🔹 15. Final Status
+git status
+Output:
+On branch master
+nothing to commit, working tree clean
+________________________________________
+🎉 Success!
+Your local Git project is now:
+•	Tracked with Git
+•	Connected to GitHub using SSH
+•	Pushed successfully to your GitHub repository
+
+
+
+
+
+Once you push your local Git repo to GitHub, the remote repository (on GitHub) will reflect those changes. Here's a simple breakdown of the full process — especially what happens after git push and how to see changes in your GitHub repo:
+________________________________________
+✅ After git push – What Happens & How to See It
+________________________________________
+🔹 1. You Pushed Code
+git push -u origin master
+📤 This command:
+•	Uploads your local branch (master)
+•	Links it to the GitHub repository (remote)
+•	Uploads all committed files (e.g., index.html)
+________________________________________
+🔹 2. What You See in Terminal
+Enumerating objects: 3, done.
+Counting objects: 100% (3/3), done.
+Writing objects: 100% (3/3), 250 bytes | 125.00 KiB/s, done.
+Total 3 (delta 0), reused 0 (delta 0), pack-reused 0
+To github.com:shubhamjambhulkar37/remote-repo-01.git
+ * [new branch]      master -> master
+branch 'master' set up to track 'origin/master'.
+💡 This confirms your push was successful.
+________________________________________
+🔹 3. Verify Changes on GitHub Website
+✅ Go to your repository:
+🔗 https://github.com/yourgithubaccount/remote-repo-01
+________________________________________
+🔽 You will now see:
+•	📁 Your file index.html is listed
+•	📌 Commit message: first version
+•	🕒 Time of the commit
+•	👤 Your GitHub username (as author)
+•	🔁 Branch name: master
+________________________________________
+🔹 4. View File Contents on GitHub
+Click on the file index.html → You will see the exact contents you added in Vim.
+________________________________________
+🔹 5. Check Commit History (Optional)
+Click the "Commits" tab or use this URL:
+🔗 https://github.com/yourgithubaccoun/remote-repo-01/commits/master
+You’ll see:
+•	Commit hash
+•	Message (first version)
+•	Author
+•	Date/time
+________________________________________
+✅ Summary
+Step	Action	Result on GitHub
+git push	Uploads code to GitHub	Files appear in GitHub repo
+Visit Repo	Open in browser	See files and commit message
+Click File	View content	File content is shown
+Click Commits	See history	View all commits & messages
+
+
